@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
 
@@ -8,6 +9,87 @@ namespace XmlValidator.Tests
     [TestFixture]
     public class FileValidatorFixture
     {
+        [Test]
+        public void FileCannotBeRead_GenericErrorReturned()
+        {
+            // Arrange
+            const string nonExistentXmlFile = "nonexistent.xml";
+            var filePath = TestFilesHelper.GetTestFilePath(nonExistentXmlFile);
+            var xsdPath = TestFilesHelper.GetTestFilePath("test.xsd");
+
+            var sut = new FileValidator();
+
+            List<string> errors;
+
+            // Act
+            sut.Validate(filePath, xsdPath, out errors);
+
+            // Assert
+            errors.Single()
+                  .Should()
+                  .Contain("Unhandled exception during validation - Could not find file")
+                  .And.Contain(nonExistentXmlFile);
+        }
+
+        [Test]
+        public void FileCannotBeRead_ReturnsFalse()
+        {
+            // Arrange
+            var filePath = TestFilesHelper.GetTestFilePath("nonexistent.xml");
+            var xsdPath = TestFilesHelper.GetTestFilePath("test.xsd");
+
+            var sut = new FileValidator();
+
+            List<string> errors;
+
+            // Act
+            var result = sut.Validate(filePath, xsdPath, out errors);
+
+            // Assert
+            result.Should().BeFalse();
+        }
+
+        [Test]
+        public void XsdCannotBeRead_GenericErrorReturned()
+        {
+            // Arrange
+            const string nonExistentXsd = "nonexistent.xsd";
+
+            var filePath = TestFilesHelper.GetTestFilePath("test_ok.xml");
+            var xsdPath = TestFilesHelper.GetTestFilePath(nonExistentXsd);
+
+            var sut = new FileValidator();
+
+            List<string> errors;
+
+            // Act
+            sut.Validate(filePath, xsdPath, out errors);
+
+            // Assert
+            errors.Single()
+                  .Should()
+                  .Contain("Unhandled exception during validation - Could not find file")
+                  .And.Contain(nonExistentXsd);
+        }
+
+        [Test]
+        public void XsdCannotBeRead_ReturnsFalse()
+        {
+            // Arrange
+            var filePath = TestFilesHelper.GetTestFilePath("test_ok.xml");
+            var xsdPath = TestFilesHelper.GetTestFilePath("nonexistent.xsd");
+
+            var sut = new FileValidator();
+
+            List<string> errors;
+
+            // Act
+            var result = sut.Validate(filePath, xsdPath, out errors);
+
+            // Assert
+            result.Should().BeFalse();
+        }
+
         [Test]
         public void InvalidFile_MultipleErrorsCanBeReturned()
         {

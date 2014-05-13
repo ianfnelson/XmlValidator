@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Xml;
 using System.Xml.Schema;
-using log4net;
 
 namespace XmlValidator
 {
@@ -15,8 +13,6 @@ namespace XmlValidator
 
     public class FileValidator : IFileValidator
     {
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-
         public bool Validate(string filePath, string xsdPath, out List<string> messages)
         {
             bool isValid;
@@ -38,7 +34,7 @@ namespace XmlValidator
             catch (Exception error)
             {
                 isValid = false;
-                Log.WarnFormat("Unhandled exception during validation - {0}", error);
+                errors.Add(string.Format("Unhandled exception during validation - {0}", error.Message));
             }
 
             messages = errors;
